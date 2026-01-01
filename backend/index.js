@@ -1,9 +1,16 @@
 const express = require('express')
-const cors = require('cors')
 
 const app = express()
 
-app.use(cors())
+const requestLogger = (request, response, next) => {
+  console.log('Method:', request.method)
+  console.log('Path:  ', request.path)
+  console.log('Body:  ', request.body)
+  console.log('---')
+  next()
+}
+
+app.use(requestLogger)
 app.use(express.static('dist'))
 app.use(express.json())
 
@@ -75,6 +82,12 @@ app.post('/api/notes', (request, response) => {
   
     response.json(note)
 })
+
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: 'unknown endpoint' })
+}
+
+app.use(unknownEndpoint)
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
